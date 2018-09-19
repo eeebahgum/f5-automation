@@ -1,0 +1,92 @@
+{
+	"variables": [],
+	"info": {
+		"name": "iControlREST",
+		"_postman_id": "0d7ac5ca-06cd-cf41-74c4-9eda1c1e8bc7",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get and extend token",
+			"description": "",
+			"item": [
+				{
+					"name": "GetToken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"X-F5-Auth-Token\", jsonData.token.name);",
+									"",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "https://{{f5Device}}/mgmt/shared/authn/login",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"username\":\"{{f5user}}\",\r\n\t\"password\":\"{{f5pass}}\",\r\n\t\"loginProviderName\": \"tmos\"\r\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "Extend Token Timeout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"tests[\"Status code is 200\"] = responseCode.code === 200;",
+									"tests[\"Token has been set\"] = jsonData.timeout == 36000;",
+									"tests[\"Token is valid\"] = jsonData.userName === postman.getEnvironmentVariable(\"f5user\");",
+									""
+								]
+							}
+						}
+					],
+					"request": {
+						"url": "https://{{f5Device}}/mgmt/shared/authz/tokens/{{X-F5-Auth-Token}}",
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": ""
+							},
+							{
+								"key": "X-F5-Auth-Token",
+								"value": "{{X-F5-Auth-Token}}",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"timeout\":\"36000\"\n}"
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
